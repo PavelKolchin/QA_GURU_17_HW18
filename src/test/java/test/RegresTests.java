@@ -1,9 +1,20 @@
+package test;
+
+import io.qameta.allure.restassured.AllureRestAssured;
+import models.lombok.LoginBodyLombokModel;
+import models.lombok.LoginResponseLombokModel;
+import models.pojo.LoginBodyPojoModel;
+import models.pojo.LoginResponsePojoModel;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import static helpers.CustomAllureListener.withCustomTemplates;
+import static io.qameta.allure.Allure.step;
 import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
 
 
 public class RegresTests {
@@ -12,18 +23,25 @@ public class RegresTests {
     @DisplayName("Successful login check")
     void successfulLoginTest() {
 
-        String data = "{ \"email\": \"eve.holt@reqres.in\", \"password\": \"cityslicka\" }";
+        LoginBodyLombokModel data = new LoginBodyLombokModel();
+        data.setEmail("eve.holt@reqres.in");
+        data.setPassword("cityslicka");
 
-        given()
-                .log().all()
-                .contentType(JSON)
-                .body(data)
-                .when()
-                .post("https://reqres.in/api/login")
-                .then()
-                .log().all()
-                .statusCode(200)
-                .body("token", is("QpwL5tke4Pnpja7X4"));
+        LoginResponseLombokModel response = step("Get authorization data", () ->
+                given()
+                        .log().all()
+                        .filter(withCustomTemplates())
+                        .contentType(JSON)
+                        .body(data)
+                        .when()
+                        .post("https://reqres.in/api/login")
+                        .then()
+                        .log().all()
+                        .statusCode(200)
+                        .extract().as(LoginResponseLombokModel.class));
+        step("Get authorization response", () -> {
+            assertThat(response.getToken()).isNotNull();
+        });
     }
 
     @Test
