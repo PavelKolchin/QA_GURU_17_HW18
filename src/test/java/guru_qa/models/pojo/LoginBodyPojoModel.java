@@ -1,4 +1,4 @@
-package models.pojo;
+package guru_qa.models.pojo;
 
 public class LoginBodyPojoModel {
 //    "{ \"email\": \"eve.holt@reqres.in\", \"password\": \"cityslicka\" }";
